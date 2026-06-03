@@ -1,0 +1,27 @@
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Environment
+.env
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# SQLite
+*.db
+*.db-wal
+*.db-shm
+
+# Node / build artifacts (if you add a JS project)
+node_modules/
+dist/

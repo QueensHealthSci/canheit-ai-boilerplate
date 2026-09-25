@@ -48,7 +48,7 @@ single biggest source of slow suites here.
 
 Seed through an API call or a factory in `beforeEach`; clean up after. Never hardcode an ID
 that differs between environments, and never depend on data that happens to be in a shared
-database today.
+database today. `baseURL` is read from the environment, never hardcoded.
 
 ## Assertions
 

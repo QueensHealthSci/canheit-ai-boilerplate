@@ -27,11 +27,11 @@ neither installs everywhere. Both scripts read these keys through
 
 | File | Installs where (`applies:`) | Loads when you touch (`paths:`) | Lines |
 | --- | --- | --- | --- |
-| `shared.md` | every repo | always | 43 |
-| `laravel.md` | `artisan` | `app/`, `Modules/`, `database/`, `routes/`, `config/`, `tests/` | 78 |
-| `vue.md` | *falls back to `paths:`* | `resources/js/`, `resources/css/`, `*.vue` | 49 |
-| `legacy-php.md` | *falls back to `paths:`* | `www-root/`, `*.inc.php` | 50 |
-| `python.md` | *falls back to `paths:`* | `*.py`, `etl/`, `requirements*.txt` | 48 |
+| `shared.md` | every repo | always | 46 |
+| `laravel.md` | `artisan` | `app/`, `Modules/`, `database/`, `routes/`, `config/`, `tests/` | 74 |
+| `vue.md` | *falls back to `paths:`* | `resources/js/`, `resources/css/`, `*.vue` | 48 |
+| `legacy-php.md` | *falls back to `paths:`* | `www-root/`, `*.inc.php` | 58 |
+| `python.md` | *falls back to `paths:`* | `*.py`, `etl/`, `requirements*.txt` | 50 |
 | `node-ts.md` | `apps/`, `packages/`, `prisma/` | those three, plus `*.spec.ts` | 61 |
 | `e2e.md` | *falls back to `paths:`* | `e2e/`, `tests/e2e/`, `*.spec.ts`, `playwright.config.*` | 76 |
 | `README.md` | `**` — it is docs, not a rule | `.claude/rules/**` | this file |

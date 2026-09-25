@@ -26,6 +26,8 @@ Tables plural snake_case · columns snake_case · foreign key `{referenced_table
 - No secret, credential or connection string in code, config or a log line.
 - No unbounded query: paginate or chunk anything that can grow.
 - Filter user-owned data in the query, never in the view or the client.
+- Business logic lives in services; controllers validate, call one, return. A module
+  reaches another only through its service, never its models or tables.
 - Tests run on the same database engine as production. Never an in-memory substitute.
 
 ## Memory

@@ -19,6 +19,11 @@ controller or route level. A check in a template or a Vue component is not a che
 endpoint is still reachable. Admin routes need explicit role verification, not merely
 authentication.
 
+**Authentication.** Passwords hashed with bcrypt or argon2 — MD5 or SHA1 is a finding. The
+session ID regenerated after login. Login rate-limited. Neither login nor reset reveals
+whether an account exists. No token or credential in a URL. CSRF protection left on for
+every state-changing route.
+
 **Data isolation.** Queries for user-owned data must filter by owner *in the query*. Frontend
 filtering is not isolation. Look for an identifier taken from the request and used to fetch a
 record without an ownership clause — that is IDOR, and it is the most common real finding.
@@ -29,7 +34,12 @@ that reported 100% line coverage. Check every use.
 
 **Input.** Validated server-side before use, with types, lengths and allowed values. In
 Laravel that means a FormRequest and `validated()`, never `all()`. In legacy PHP,
-the codebase's own input cleaner and its database layer's parameter binding. Reject unexpected fields rather than ignoring them.
+the codebase's own input cleaner and its database layer's parameter binding. Reject
+unexpected fields rather than ignoring them. Raw SQL — `DB::raw()`, `whereRaw()`, a
+hand-built string — takes bindings, never an interpolated value.
+
+**Output.** Escaped for where it lands: HTML, attribute, JavaScript, JSON, shell. A raw-PHP or
+Smarty template, or a `v-html`/`{!! !!}`, is where XSS gets in.
 
 **Secrets and PHI.** Nothing sensitive in a log line, an error message, an exception payload
 or a client response. Where the application handles personal or health information, a logged request body

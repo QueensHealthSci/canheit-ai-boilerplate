@@ -50,6 +50,8 @@ never its models or tables.
   a Blade or Vue template is not a guard.
 - Business logic in Services or Actions, constructor-injected, stateless between calls.
 - Route model binding rather than a manual `find()`.
+- `DB::raw()`, `whereRaw()` and `selectRaw()` take bindings, never an interpolated value.
+- Multi-step writes inside `DB::transaction()`.
 
 ## Imports and jobs
 

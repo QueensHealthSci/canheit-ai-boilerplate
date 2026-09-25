@@ -23,6 +23,10 @@ abstraction library (ADOdb, a home-grown wrapper). Follow the code, not the sent
 - Permissions through the application's ACL object (e.g. `$acl->isAllowed($resource, $action)`),
   checked in the `.inc.php` controller — a check in the template only is not a check.
 - Never trust `$_GET`, `$_POST` or `$_REQUEST` unsanitized.
+- Escape output for where it lands (HTML, attribute, JS) — Smarty or raw-PHP templates do
+  not do it for you.
+- Sessions stored through the database layer are used through it, never `session_*()`
+  directly. CAS and LDAP go through the application's auth classes, never around them.
 
 ## Module structure
 
@@ -44,7 +48,11 @@ Do not introduce Composer autoloading where it does not already exist, and do no
 
 jQuery, jQuery UI and DataTables — the established stack. No modern framework goes into a
 legacy module. AJAX endpoints are `api-*.inc.php` returning JSON, with CSRF sent on every
-state-changing request and an error callback on every call.
+state-changing request and an error callback on every call. Match the file's JavaScript:
+no ES module syntax without a bundler, and `var` where the file uses it. A 401 or 403 from
+an AJAX call sends the user to login, not a silent failure. Submit buttons disable while
+the request is in flight. One Bootstrap and one jQuery UI version per project, upgraded
+only with approval.
 
 DataTables: server-side processing past a few hundred rows. (The old documents said 100 in
 one place and 500 in another; pick based on the query, and say which you picked.)

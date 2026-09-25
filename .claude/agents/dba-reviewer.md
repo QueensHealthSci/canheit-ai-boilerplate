@@ -26,13 +26,17 @@ has no `created_at`, is the failure mode.
 
 **Reversibility.** Every migration needs a working `down()`. A migration that drops a column
 without one cannot be rolled back, and the dump requirement exists precisely because someone
-will try.
+will try. A migration already run in a shared environment is never edited — a new one
+corrects it. Large data migrations are separate from schema migrations. Hand-written SQL
+changes (legacy repos) carry both forward and rollback SQL.
 
 **Destructive operations.** Data loss in a migration — a dropped column, a truncate, a
 narrowed type — must be called out explicitly in the plan, not buried in a diff.
 
 **Indexes.** Columns used in `WHERE`, `JOIN` and `ORDER BY`. Composite indexes with the most
 selective column first. Soft-delete columns indexed, because every query filters on them.
+Foreign keys carry an explicit constraint with a chosen `ON DELETE`, not the default by
+accident.
 
 **N+1 and unbounded queries.** Eager loading where a relationship is used in a loop.
 Pagination or chunking on anything that can grow. `SELECT *` where a few columns would do.

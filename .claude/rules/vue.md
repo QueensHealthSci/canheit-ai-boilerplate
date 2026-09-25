@@ -25,7 +25,8 @@ If something genuinely needs a store, raise it rather than adding the dependency
 
 ## Inertia
 
-Check `package.json` for v1 or v2 before using a v2-only API (deferred props, prefetching). Forms go through `useForm()` with its error state;
+Check `package.json` for v1 or v2 before using a v2-only API (deferred props, prefetching). Forms go through `useForm()` with its error state,
+and the submit button is disabled while `form.processing`;
 navigation through `router.visit()`, not a raw `<a>` for an internal link.
 
 ## Components

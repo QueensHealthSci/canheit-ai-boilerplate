@@ -14,6 +14,8 @@ paths:
 - Log each stage with counts: extracted, transformed, loaded, skipped, failed. A run that
   logs only "done" cannot be debugged later.
 - Record run metadata: start, end, rows processed, errors.
+- Retry transient failures (network, locks) with backoff; catch specific exceptions, and never
+  swallow a bare `except` without logging which record and stage failed.
 
 ## Data warehouse schema
 
@@ -29,7 +31,7 @@ more than one place, a new role means changing every one — record where in the
 
 Timezone-aware datetimes, normalized to UTC on storage. Declare the strategy for NULLs
 explicitly — skip, default or flag — and write it in the docstring. Deduplicate before load
-using a natural key or hash.
+using a natural key or hash. Validate types and required fields before load, not after.
 
 ## Models
 

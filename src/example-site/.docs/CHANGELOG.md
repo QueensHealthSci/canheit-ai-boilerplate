@@ -4,6 +4,9 @@ All notable changes to the Example Site (TaskFlow) project are documented in thi
 
 ## [Unreleased]
 
+### Changed
+- Adopted the framework layout: repo `CLAUDE.md` from `TEMPLATE_AGENT.md`, `.claude/` and `bin/` linked by `scripts/sync-repo.sh`, learnings split by domain under `.docs/learnings/`, plans moved to `.docs/plans/`, `TEST_LEDGER.md` added.
+
 ### 2026-06-01 - Initial Example
 
 #### Added

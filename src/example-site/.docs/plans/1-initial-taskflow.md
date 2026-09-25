@@ -1,5 +1,7 @@
 # Task: Initial TaskFlow example — Issue #1
 **Status:** Complete
+**Issue:** #1
+**Tier:** Standard
 **Module:** Example Site (TaskFlow)
 
 ## 1. Goal

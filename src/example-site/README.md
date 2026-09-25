@@ -1,8 +1,8 @@
 # Example Site — TaskFlow
 
 A small, intentionally simple **task tracker** that demonstrates the project-level conventions
-of this boilerplate: a repo-level agent file (`CLAUDE.md`), a `.docs/` folder for project
-memory, and source code that follows the shared coding standards.
+of this boilerplate: a repo `CLAUDE.md` holding configuration, a `.docs/` folder for project
+memory, framework hooks and rules linked into `.claude/`, and source code that follows the shared coding standards.
 
 It is a Flask + SQLite REST API with a minimal HTML dashboard. There is no frontend build step.
 
@@ -74,7 +74,12 @@ Invalid input returns `400` with a JSON error body.
 
 ## Project documentation
 
-- `CLAUDE.md` — repo-level agent configuration (inherits `../../AGENT.md`)
-- `.docs/CHANGELOG.md` — change history
-- `.docs/LEARNINGS.md` — technical lessons and gotchas
-- `.docs/project-plans/` — per-feature plans
+- `CLAUDE.md` — repo configuration: commands, ports, traps, locked decisions. The protocol
+  itself (`../../AGENTS.md`) loads through the framework root's `CLAUDE.md`, never by import.
+- `.claude/` — hooks, rules, skills and reviewer subagents, symlinked to the framework root
+  by `../../scripts/sync-repo.sh`
+- `bin/check`, `bin/doctor` — the test command and the `CLAUDE.md` health check
+- `.docs/CHANGELOG.md` — change history (append under `## [Unreleased]`)
+- `.docs/learnings/` — lessons that will recur, split by domain
+- `.docs/plans/` — `<issue>-<slug>.md` plans
+- `.docs/TEST_LEDGER.md` — pre-existing test failures

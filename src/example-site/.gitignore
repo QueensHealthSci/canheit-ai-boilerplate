@@ -16,3 +16,6 @@ htmlcov/
 .env
 venv/
 .venv/
+
+# Pre-migration dumps (AGENTS.md non-negotiable 2) hold real data
+database/backups/

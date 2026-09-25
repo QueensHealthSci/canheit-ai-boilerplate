@@ -1,45 +1,73 @@
-# Example API (TaskFlow) — Agent Configuration
+# Example API (TaskFlow)
 
-## INHERITANCE
-Global Protocol: ../../AGENT.md
-This file extends the CLI Development Protocol. All global rules and workflow
-steps apply. Do not deviate from AGENT.md unless explicitly noted below.
+**Verified:** [YYYY-MM-DD — set the first time every command below has been run and worked. The
+application source is not bundled yet, so none has.]
 
-## ROLE OVERRIDE
-Role: Senior TypeScript / Node.js Developer
+## IMPORTS
+@../../.agents/architect.md
+@../../.agents/security.md
 
-## CONTAINER ENVIRONMENT
-Type: Docker Compose
-Exec Prefix: docker compose exec app
-Example: docker compose exec app npm test
+## ROLE
+Senior TypeScript / Node.js developer — Express service with a server-rendered dashboard.
 
-## FRONTEND BUILD
-Source Directory: N/A (server-rendered HTML dashboard, no separate frontend build)
-Build Command: npm run build   (compiles TypeScript → dist/ via tsc)
-Dev Server: npm run dev         (tsx watch, http://localhost:8000)
+## STACK
+Node, TypeScript (strict, `noUncheckedIndexedAccess`, NodeNext modules), Express,
+better-sqlite3 (synchronous) in WAL mode, Vitest + supertest.
 
-## TESTING
-Framework: Vitest (+ supertest for HTTP feature tests)
-Feature Test Command: npm test -- tests/routes.test.ts
-Full Suite Command: npm test            (runs `vitest run --coverage`)
-Filter Flag: -t   (e.g. `npm test -- -t "soft delete"`)
+**Schema lineage:** legacy (integer `deleted_date`, `created_date`, `updated_date`) — never mixed.
+**Test database:** SQLite `:memory:` — the production engine, so an in-memory database is legitimate here.
 
-## DEBUG STATEMENTS TO CHECK
-Patterns: console.log | console.debug | debugger
+## COMMANDS
 
-## CODING STANDARDS
-Reference: ../../.context/rules/coding_standards.md (Vue/TypeScript + Python sections;
-the TypeScript strictness rules apply directly to this Node service)
-Additional Standards: See the `.agents/architect.md` and `.agents/security.md` specialists.
+| Purpose | Command |
+| --- | --- |
+| Exec prefix `{EXEC_RAW}` | `docker compose exec app` |
+| Node service `{EXEC_NODE}` | `docker compose exec app` |
+| Tests for one file or filter | `npm test -- tests/routes.test.ts` (filter: `-t "soft delete"`) |
+| Full suite with coverage | `bin/check` (resolves to `npm test`, i.e. `vitest run --coverage`) |
+| Static analysis / types | `npm run build` (`tsc` → `dist/`) |
+| Lint | none configured yet |
+| Dev server | `npm run dev` (tsx watch, http://localhost:8000) |
+| Database dump (before destructive migrations) | `sqlite3 "$TASKFLOW_DB" .dump > database/backups/taskflow-$(date +%s).sql` |
 
-## REPO-SPECIFIC RULES
-- TypeScript strict mode — **no `any`**. Every data structure has an interface in `src/types.ts`.
-- All SQL uses better-sqlite3 prepared statements with `?` placeholders — never string interpolation.
-- Tasks are soft-deleted via a nullable `deleted_date` integer column — never hard-delete.
-- SQLite runs in WAL mode (`PRAGMA journal_mode = WAL`).
-- Config comes from environment variables (`TASKFLOW_DB`, `PORT`) — no secrets in code.
-- Business logic and validation live in `src/services.ts` and raise `ValidationError`; the
-  Express error handler in `src/app.ts` maps that to a `400` JSON response.
-- Route handlers stay thin: parse input, call a service, return the result.
-- NodeNext module resolution requires `.js` extensions on relative imports (even from `.ts`).
-- Any value interpolated into the HTML dashboard must be passed through `escapeHtml`.
+## PORTS
+App `PORT` 8000 inside the container; host `APP_PORT` 8010, so it can run beside
+`example-site`. Registry: `../../.context/reference/docker.md`.
+
+## MAP
+
+| What | Where |
+| --- | --- |
+| Application code | `src/` (`app.ts`, `server.ts`, `db.ts`, `services.ts`, `routes.ts`) |
+| Types | `src/types.ts` — every entity has an interface |
+| Tests | `tests/` (unit for services, supertest for routes) |
+| Plans | `.docs/plans/<issue>-<slug>.md` |
+| Design docs | `.docs/design/<issue>-<slug>.md` |
+| Changelog | `.docs/CHANGELOG.md` — append under `## [Unreleased]`; never read whole |
+| Learnings | `.docs/learnings/<domain>_learnings.md` |
+| Failure ledger | `.docs/TEST_LEDGER.md` |
+
+## TRAPS
+- Relative imports need `.js` even in `.ts` source (NodeNext); omitting it fails at runtime.
+- `req.params.id` is `string | undefined` under `noUncheckedIndexedAccess` — parse, don't `!`.
+- A read without `deleted_date IS NULL` shows soft-deleted tasks again.
+
+## BLAST RADIUS
+- The dashboard renders stored values: anything not passed through `escapeHtml` is XSS.
+
+## LOCKED DECISIONS
+
+| Decision | Date | Reasoning |
+| --- | --- | --- |
+| better-sqlite3 (synchronous), no ORM | 2026-06-02 | `.docs/learnings/database_learnings.md` |
+| Soft delete through integer `deleted_date`; never hard-delete | 2026-06-02 | `.docs/learnings/database_learnings.md` |
+
+## DEBUG PATTERNS
+`console.log` `console.debug` `debugger`
+
+## REPO RULES
+- No `any`. Every data structure has an interface in `src/types.ts`.
+- All SQL uses prepared statements with `?` placeholders — never string interpolation.
+- Business logic and validation live in `src/services.ts` and raise `ValidationError`; the error
+  handler in `src/app.ts` maps it to `400`. Route handlers stay thin.
+- Configuration comes from environment variables (`TASKFLOW_DB`, `PORT`) — no secrets in code.

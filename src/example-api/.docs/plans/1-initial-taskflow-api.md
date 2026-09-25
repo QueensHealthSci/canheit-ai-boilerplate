@@ -1,5 +1,7 @@
 # Task: Initial TaskFlow API (TypeScript) — Issue #1
 **Status:** Complete
+**Issue:** #1
+**Tier:** Standard
 **Module:** Example API (TaskFlow)
 
 ## 1. Goal

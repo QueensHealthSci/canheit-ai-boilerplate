@@ -37,7 +37,7 @@ npm start            # node dist/server.js
 ```bash
 cp .env.example .env
 docker compose up -d --build
-# Visit http://localhost:8000
+# Visit http://localhost:8010
 ```
 
 ## Running the tests
@@ -72,7 +72,7 @@ Invalid input returns `400` with a JSON error body.
 |----------|---------|---------|
 | `TASKFLOW_DB` | `taskflow.db` | Path to the SQLite database file |
 | `PORT` | `8000` | Port the server listens on |
-| `APP_PORT` | `8000` | Host port published by docker-compose |
+| `APP_PORT` | `8010` | Host port published by docker-compose (8010 so it runs beside `example-site`) |
 
 ## Project layout
 
@@ -91,7 +91,12 @@ tests/
 
 ## Project documentation
 
-- `CLAUDE.md` — repo-level agent configuration (inherits `../../AGENT.md`)
-- `.docs/CHANGELOG.md` — change history
-- `.docs/LEARNINGS.md` — technical lessons and gotchas
-- `.docs/project-plans/` — per-feature plans
+- `CLAUDE.md` — repo configuration: commands, ports, traps, locked decisions. The protocol
+  itself (`../../AGENTS.md`) loads through the framework root's `CLAUDE.md`, never by import.
+- `.claude/` — hooks, rules, skills and reviewer subagents, symlinked to the framework root
+  by `../../scripts/sync-repo.sh`
+- `bin/check`, `bin/doctor` — the test command and the `CLAUDE.md` health check
+- `.docs/CHANGELOG.md` — change history (append under `## [Unreleased]`)
+- `.docs/learnings/` — lessons that will recur, split by domain
+- `.docs/plans/` — `<issue>-<slug>.md` plans
+- `.docs/TEST_LEDGER.md` — pre-existing test failures

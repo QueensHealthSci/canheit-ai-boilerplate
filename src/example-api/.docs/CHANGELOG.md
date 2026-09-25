@@ -4,6 +4,9 @@ All notable changes to the Example API (TaskFlow) project are documented in this
 
 ## [Unreleased]
 
+### Changed
+- Adopted the framework layout: repo `CLAUDE.md` from `TEMPLATE_AGENT.md`, `.claude/` and `bin/` linked by `scripts/sync-repo.sh`, learnings split by domain under `.docs/learnings/`, plans moved to `.docs/plans/`, `TEST_LEDGER.md` added.
+
 ### 2026-06-02 - Initial Example
 
 #### Added

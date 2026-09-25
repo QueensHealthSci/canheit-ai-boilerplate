@@ -7,7 +7,7 @@ The framework's own project artefacts. The layout every repo follows is
 | --- | --- |
 | `learnings/` | Lessons that will recur, split by domain. Index and format: `learnings/README.md`. |
 | `design/` | ADRs. Permanent, never archived. |
+| `CHANGELOG.md` | Framework changes, from `.global-docs/TEMPLATE_CHANGELOG.md`. Append only. |
 
-Add a `CHANGELOG.md` (from `.global-docs/TEMPLATE_CHANGELOG.md`) once you start changing the
-framework for your own team. `TEST_LEDGER.md` is absent because the only suite here is
+`TEST_LEDGER.md` is absent because the only suite here is
 `.claude/hooks/tests/hooks.sh`, which has no pre-existing failures.

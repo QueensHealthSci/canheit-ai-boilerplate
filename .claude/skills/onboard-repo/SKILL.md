@@ -27,7 +27,8 @@ step below assumes it.
 
 Delete any `@../../AGENT.md`, `Inherits: ../../AGENT.md` or `Global Protocol: ../../AGENT.md`
 line from `CLAUDE.md`. They raise an approval dialog every session and resolve to nothing
-outside the framework workspace. Keep `@../../.agents/*.md` persona imports for now.
+outside the framework workspace. Delete any `@../../.agents/*.md` persona import
+too — that library is retired; stack detail loads from `.claude/rules/` by path.
 
 Verify with `/memory`: root and repo `CLAUDE.md` both listed, no failed imports.
 

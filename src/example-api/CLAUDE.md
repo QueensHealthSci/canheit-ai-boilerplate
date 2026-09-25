@@ -3,10 +3,6 @@
 **Verified:** [YYYY-MM-DD — set the first time every command below has been run and worked. The
 application source is not bundled yet, so none has.]
 
-## IMPORTS
-@../../.agents/architect.md
-@../../.agents/security.md
-
 ## ROLE
 Senior TypeScript / Node.js developer — Express service with a server-rendered dashboard.
 

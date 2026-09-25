@@ -3,9 +3,6 @@
 **Verified:** [YYYY-MM-DD — set the first time every command below has been run and worked. The
 application source is not bundled yet, so none has.]
 
-## IMPORTS
-@../../.agents/python-data.md
-
 ## ROLE
 Senior Python developer — Flask service with a minimal server-rendered dashboard.
 

@@ -41,8 +41,8 @@ absent.
 **Applies to:** legacy-lineage repos (integer `created_date`/`updated_date`/`deleted_date`,
 `{table_singular}_id` keys).
 
-**Enforced:** `.claude/rules/laravel.md`. Previously covered by seven words in
-`.agents/dba.md`, which is why it kept recurring.
+**Enforced:** `.claude/rules/laravel.md`. Previously covered by seven words in the
+retired `.agents/dba.md` persona, which is why it kept recurring.
 
 ---
 

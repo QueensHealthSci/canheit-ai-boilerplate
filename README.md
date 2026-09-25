@@ -39,7 +39,6 @@ make each one cost context only when it is relevant:
 │   ├── rules/                 #   shared.md (always) + laravel, vue, python, node-ts, e2e, legacy-php
 │   ├── skills/                #   ticket, plan, verify, release, onboard-repo
 │   └── agents/                #   security-, dba-, test-reviewer (read-only)
-├── .agents/                   # personas a repo CLAUDE.md can @import (architect, security, …)
 ├── .context/                  # reference, never auto-loaded: open the section you need
 │   ├── development_cycle.md   #   the cycle in detail
 │   ├── enforcement.md         #   which rule is enforced where

@@ -16,10 +16,6 @@ Under 100 lines. Architecture narrative goes in .docs/ARCHITECTURE.md.
 
 **Verified:** [YYYY-MM-DD — the last date every command below was run and worked]
 
-## IMPORTS
-<!-- Persona files only, and only the ones this repo uses. Never AGENTS.md. -->
-@../../.agents/[...].md
-
 ## ROLE
 [e.g. Senior PHP developer in a legacy in-house PHP codebase | Senior TypeScript/NestJS developer]
 

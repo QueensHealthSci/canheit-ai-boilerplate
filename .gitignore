@@ -1,12 +1,28 @@
+# Application repos are cloned into src/ and tracked in their own git history. The two
+# bundled examples are the exception: they live in-tree so the layout is easy to see.
+/src/*
+!/src/README.md
+!/src/example-site/
+!/src/example-api/
+
 # OS / editor
 .DS_Store
+**/.DS_Store
+Thumbs.db
 .vscode/
 .idea/
 *.swp
 
-# Environment
+# Environment files. Stage files (`.env.develop`, `.env.staging`, `.env.main`) may be
+# COMMITTED BY DESIGN where a deploy copies `.env.{stage}` into the release; everything in
+# them is then visible to anyone with repo access. Only the local working file and backups
+# are ignored. The agent never reads, prints or edits any `.env*` (AGENTS.md
+# non-negotiable 4); humans edit them, and the agent may stage and commit that change
+# without opening the file.
 .env
-*.local
+.env.local
+.env.*.local
+.env.bak*
 
 # Python
 __pycache__/
@@ -22,6 +38,6 @@ htmlcov/
 *.db-wal
 *.db-shm
 
-# Node / build artifacts (if you add a JS project)
+# Node / build artefacts
 node_modules/
 dist/

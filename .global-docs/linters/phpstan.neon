@@ -1,0 +1,39 @@
+# Copy to the repo root. Requires: composer require --dev larastan/larastan spaze/phpstan-disallowed-calls
+# Each disallowed call below replaces a paragraph of coding-standards prose with a check
+# that runs in seconds.
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/spaze/phpstan-disallowed-calls/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - app
+    tmpDir: storage/phpstan
+
+    disallowedFunctionCalls:
+        -
+            function: 'env()'
+            message: 'read configuration through config(); env() returns null once config is cached'
+            allowIn:
+                - config/*.php
+        -
+            function:
+                - 'dd()'
+                - 'dump()'
+                - 'var_dump()'
+                - 'print_r()'
+                - 'ray()'
+            message: 'debug output must not ship'
+            allowIn:
+                - tests/*
+
+    disallowedMethodCalls:
+        -
+            method: 'Illuminate\Http\Request::all()'
+            message: 'use validated() or only(); all() hands unvalidated input to mass assignment'
+
+    disallowedStaticCalls:
+        -
+            method: 'Illuminate\Support\Facades\DB::raw()'
+            message: 'raw SQL bypasses bindings; if unavoidable, bind every value and justify in a comment'

@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# bin/doctor — is CLAUDE.md telling the truth about this repo?
+#
+# Dry-runs what the repo file documents and reports PASS / WARN / FAIL per item:
+#   - Verified: present and not older than FRAMEWORK_VERIFIED_MAX_DAYS (90)
+#   - every command in the COMMANDS table resolves: executables exist, vendor/node bins are
+#     present, npm scripts are defined, docker services exist when docker is up
+#   - every path in the MAP table exists
+#   - no TEMPORARY section (AGENTS.md voids override-claiming blocks; this catches them at
+#     eleven days rather than eleven months)
+#   - bin/check exists and is executable
+#   - the protocol will load: an ancestor CLAUDE.md imports AGENTS.md
+#
+# Exit 0 when nothing FAILs. Run at session start and after editing CLAUDE.md.
+# Copy to <repo>/bin/doctor and chmod +x. No configuration needed.
+set -uo pipefail
+cd "$(dirname "$0")/.."
+repo="$PWD"; file="CLAUDE.md"
+pass=0; warn=0; fail=0
+ok()   { pass=$((pass+1)); printf '  PASS  %s\n' "$*"; }
+wn()   { warn=$((warn+1)); printf '  WARN  %s\n' "$*"; }
+bad()  { fail=$((fail+1)); printf '  FAIL  %s\n' "$*"; }
+strip() { sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//' -e 's/^`//;s/`$//'; }
+days_since() { local t; t="$(date -j -f %Y-%m-%d "$1" +%s 2>/dev/null || date -d "$1" +%s 2>/dev/null)" || return 1; echo $(( ( $(date +%s) - t ) / 86400 )); }
+section() {  # section NAME -> lines of that ## section
+  awk -v s="## $1" 'index($0,s)==1{p=1;next} /^## /{p=0} p' "$file"
+}
+table_col() {  # table_col N -> Nth cell of each data row on stdin, backticks stripped
+  grep -E '^\|' | grep -vE '^\|[[:space:]]*-+' | awk -F'|' -v n="$1" 'NR>1{print $(n+1)}' | strip
+}
+
+[ -f "$file" ] || { echo "FAIL  no $file in $repo"; exit 1; }
+echo "doctor: $repo"
+
+# --- header ------------------------------------------------------------------------------
+echo "header"
+v="$(grep -oE 'Verified:\*?\*?[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}' "$file" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1)"
+if [ -z "$v" ]; then bad "Verified: missing — commands below are unconfirmed"
+elif age="$(days_since "$v")"; then
+  [ "$age" -le "${FRAMEWORK_VERIFIED_MAX_DAYS:-90}" ] && ok "Verified $v ($age days ago)" || wn "Verified $v is $age days old — re-run and update the date"
+fi
+grep -qE '^#+ .*TEMPORARY' "$file" && bad "TEMPORARY section at line $(grep -nE '^#+ .*TEMPORARY' "$file" | cut -d: -f1 | head -1) — AGENTS.md voids override-claiming blocks; delete or date it" || ok "no TEMPORARY block"
+grep -qE '^@\.\./\.\./AGENT\.md|Global Protocol:.*AGENT\.md' "$file" && bad "imports AGENTS.md by path — obsolete, loads by walk-up; delete the line" || ok "no obsolete protocol import"
+
+# --- protocol loads --------------------------------------------------------------------
+echo "protocol"
+d="$repo"; found=''
+for _ in 0 1 2 3; do [ -f "$d/CLAUDE.md" ] && grep -q '^@AGENTS\.md' "$d/CLAUDE.md" && [ -f "$d/AGENTS.md" ] && { found="$d"; break; }; [ "$d" = / ] && break; d="$(dirname "$d")"; done
+[ -n "$found" ] && ok "AGENTS.md reachable via $found/CLAUDE.md" || bad "no ancestor CLAUDE.md imports AGENTS.md — the protocol will not load here (clone under codebase/src/)"
+
+# --- commands ----------------------------------------------------------------------------
+echo "commands"
+n=0
+while IFS= read -r c; do
+  [ -n "$c" ] || continue
+  case "$c" in \[*|*EDIT*) continue;; esac
+  n=$((n+1))
+  first="${c%% *}"
+  if printf '%s' "$c" | grep -qE '^docker compose exec'; then
+    svc="$(printf '%s' "$c" | sed -E 's/^docker compose exec( -[A-Za-z]+)* ([^ ]+).*/\2/')"
+    if command -v docker >/dev/null && docker compose ps --services >/dev/null 2>&1; then
+      docker compose ps --services 2>/dev/null | grep -qx "$svc" && ok "service '$svc' exists: $c" || bad "no compose service '$svc': $c"
+    else wn "docker not running — could not verify service '$svc': $c"; fi
+  elif printf '%s' "$c" | grep -qE '(^|[[:space:]])(\./)?vendor/bin/[A-Za-z0-9_.-]+'; then
+    bin="$(printf '%s' "$c" | grep -oE '(\./)?vendor/bin/[A-Za-z0-9_.-]+' | head -1)"
+    [ -x "$bin" ] && ok "$bin present: $c" || bad "$bin missing — composer install, or the command is wrong: $c"
+  elif printf '%s' "$c" | grep -qE '(^|[[:space:]])(\./)?node_modules/\.bin/[A-Za-z0-9_.-]+'; then
+    bin="$(printf '%s' "$c" | grep -oE '(\./)?node_modules/\.bin/[A-Za-z0-9_.-]+' | head -1)"
+    [ -x "$bin" ] && ok "$bin present: $c" || bad "$bin missing — npm install, or the command is wrong: $c"
+  elif printf '%s' "$c" | grep -qE '^(npm|yarn|pnpm) (run )?[A-Za-z0-9:_-]+'; then
+    s="$(printf '%s' "$c" | sed -E 's/^(npm|yarn|pnpm) (run )?([A-Za-z0-9:_-]+).*/\3/')"
+    [ -f package.json ] && grep -qE "\"$s\"[[:space:]]*:" package.json && ok "npm script '$s' defined: $c" || bad "no '$s' script in package.json: $c"
+  elif [ "${first#./}" != "$first" ] || printf '%s' "$first" | grep -q /; then
+    [ -e "$first" ] && ok "$first exists: $c" || bad "$first does not exist: $c"
+  else
+    command -v "$first" >/dev/null 2>&1 && ok "'$first' on PATH: $c" || bad "'$first' not on PATH: $c"
+  fi
+done < <(section COMMANDS | table_col 2)
+[ "$n" -gt 0 ] || wn "COMMANDS table is empty or unfilled"
+
+# --- map ---------------------------------------------------------------------------------
+echo "map"
+while IFS= read -r p; do
+  [ -n "$p" ] || continue
+  case "$p" in \[*|*\<*) continue;; esac
+  p="${p%% —*}"; p="${p%% -*}"; p="$(printf '%s' "$p" | strip)"
+  [ -e "$p" ] && ok "$p" || { case "$p" in .docs/*) wn "$p not present yet";; *) bad "$p does not exist";; esac; }
+done < <(section MAP | table_col 2)
+
+# --- bin/check ---------------------------------------------------------------------------
+echo "bin"
+if [ ! -x bin/check ]; then
+  bad "bin/check missing or not executable"
+elif runner="$(CHECK_DRY=1 bin/check 2>&1 >/dev/null | sed -n 's/^bin\/check: \(.*\)/\1/p' | tail -1)" \
+     && printf '%s' "$runner" | grep -q 'no test runner'; then
+  bad "bin/check cannot find a test runner here — add one, or set CHECK_CMD"
+else
+  ok "bin/check resolves a runner"
+fi
+
+echo
+printf '%d pass, %d warn, %d fail\n' "$pass" "$warn" "$fail"
+[ "$fail" -eq 0 ]

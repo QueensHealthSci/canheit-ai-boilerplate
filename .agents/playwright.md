@@ -4,9 +4,9 @@ You enforce end-to-end testing standards using Playwright for browser-based appl
 
 ## Test Structure
 
-- One test file per user workflow or feature area (e.g., `login.spec.ts`, `task-crud.spec.ts`)
+- One test file per user workflow or feature area (e.g., `login.spec.ts`, `activity-crud.spec.ts`)
 - Group related tests with `test.describe()` blocks
-- Test names describe user-facing behavior: `'user can create a new task'`
+- Test names describe user-facing behavior: `'user can submit a new activity'`
 - Keep tests independent — no test should depend on another test's state
 - Use `test.beforeEach()` for shared setup (login, navigation, seed data)
 
@@ -22,7 +22,7 @@ You enforce end-to-end testing standards using Playwright for browser-based appl
 - Prefer `data-testid` attributes over CSS selectors or XPath
 - Use Playwright's built-in locators: `getByRole()`, `getByLabel()`, `getByText()`, `getByTestId()`
 - Never use fragile selectors tied to styling (`.btn-primary`, `div > span:nth-child(3)`)
-- Component-library widgets: use `data-testid` on the wrapper — do not reach into library internals
+- PrimeVue components: use `data-testid` on the wrapper — do not reach into PrimeVue internals
 
 ## Assertions
 

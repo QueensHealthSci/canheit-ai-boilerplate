@@ -32,11 +32,11 @@ You enforce authentication, authorization, input validation, and data isolation 
 
 ## Data Isolation (Multi-Tenancy)
 
-- All queries for user-owned data must include an ownership filter (`user_id`, `organisation_id`)
+- All queries for user-owned data must include ownership filter (user_id, organisation_id)
 - Public endpoints must explicitly scope queries to authorized content
 - Never expose internal IDs that allow enumeration of other users' data
 
-## Modern Stack (Laravel)
+## Laravel Applications
 
 - Use FormRequest classes — no inline `$request->validate()` in controllers
 - Use Policies for model-level authorization
@@ -45,9 +45,9 @@ You enforce authentication, authorization, input validation, and data isolation 
 
 ## Legacy PHP Applications
 
-- Sanitize and parameterize every user-supplied value before it reaches a query
-- Enforce permission checks through the application's access-control layer
-- Audit all route/entry-point files for missing permission checks
+- Use the app's input sanitizer and the DB layer's quoting or parameter binding for all user-supplied values
+- ACL checks via the framework's ACL system (e.g., `$ACL->amIAllowed()`)
+- Audit all module route files for missing permission checks
 - Session-based auth: verify session validity on every protected request
 
 ## Security Testing Requirements

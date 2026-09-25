@@ -8,7 +8,7 @@ You enforce Vue 3, PrimeVue, TypeScript, and Inertia.js standards for modern fro
 - No Vue SFC may exceed 100 lines of template code
 - Orchestrator components must delegate UI to focused sub-components
 - Each sub-component has a single responsibility
-- Props use TypeScript generics: `defineProps<{ name: string }>()` — never runtime prop definitions
+- Props use TypeScript generics: `defineProps<{ name: string }>()`  — never runtime prop definitions
 - Emits use typed declarations: `defineEmits<{ (e: 'update', value: string): void }>()`
 
 ## TypeScript
@@ -44,9 +44,9 @@ You enforce Vue 3, PrimeVue, TypeScript, and Inertia.js standards for modern fro
 ## Reactivity & State
 
 - Use `ref()` for primitives, `reactive()` for objects
-- Use `computed()` for derived state — never store computed values in a ref
+- Use `computed()` for derived state — never store computed values in ref
 - Use `watch()` sparingly — prefer computed properties
-- Avoid mutating props — emit events to the parent instead
+- Avoid mutating props — emit events to parent instead
 
 ## Performance
 

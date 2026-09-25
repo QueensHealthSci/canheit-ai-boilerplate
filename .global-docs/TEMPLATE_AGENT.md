@@ -1,51 +1,99 @@
-# {REPO NAME} - Agent Configuration
+# {REPO NAME}
 
-> **How to use this template**
-> Copy this file into your repo root and rename it to match your agent:
-> - `CLAUDE.md` (for Claude Code / Claude CLI)
-> - `GEMINI.md` (for Gemini)
-> - `.cursorrules` (for Cursor)
-> - Or any other agent-specific filename
->
-> Fill in ALL sections below. Do not remove any sections — mark as `N/A` if not applicable.
+<!--
+Copy to the repo root as CLAUDE.md. Claude Code only — no GEMINI.md, AGENTS.md, .cursorrules.
 
-## INHERITANCE
-Global Protocol: ../../AGENT.md
-This file extends the CLI Development Protocol. All global rules and workflow
-steps defined in AGENT.md apply without exception. Do not deviate from AGENT.md
-unless explicitly noted in REPO-SPECIFIC RULES below.
+CONFIGURATION, not policy. AGENTS.md owns the cycle, gates, coverage, branch and plan locations
+and the definition of done; restate none of it. Where they disagree, AGENTS.md wins and this
+file is the bug. Every value must be real and current — a stale value is worse than a missing
+one, because the agent will act on it. Delete rows that do not apply; never leave a placeholder.
 
-## ROLE OVERRIDE
-Role: [e.g., Senior PHP and Laravel 11 Developer | Senior TypeScript and Vue 3 Developer | Senior Python Developer]
+Do NOT import AGENTS.md: it loads by ancestor walk-up through the framework root's CLAUDE.md,
+and an explicit import raises an approval dialog every session and resolves to nothing in a
+clone outside the framework workspace.
+Under 100 lines. Architecture narrative goes in .docs/ARCHITECTURE.md.
+-->
 
-## CONTAINER ENVIRONMENT
-Type: [Laravel Sail | Docker Compose | Podman | None]
-Exec Prefix: [./vendor/bin/sail | docker compose exec <service> | none]
-Example: [e.g., ./vendor/bin/sail artisan migrate]
+**Verified:** [YYYY-MM-DD — the last date every command below was run and worked]
 
-## FRONTEND BUILD
-Source Directory: [resources/ | src/ | pages/ | app/ | components/ | N/A]
-Build Command: [npm run build | yarn build | pnpm build | N/A]
-Dev Server: [npm run dev | yarn dev | N/A]
-Trigger Rule: [e.g., If any file in resources/ is modified, append `npm run build`]
+## IMPORTS
+<!-- Persona files only, and only the ones this repo uses. Never AGENTS.md. -->
+@../../.agents/[...].md
 
-## TESTING
-Framework: [Pest PHP | PHPUnit | Vitest | Jest | Pytest | Go test]
-Feature Test Command: [e.g., php artisan test --filter YourTest --coverage]
-Full Suite Command: [e.g., php artisan test --coverage]
-Filter Flag: [--filter | --testNamePattern | -k | -run]
+## ROLE
+[e.g. Senior PHP developer in a legacy in-house PHP codebase | Senior TypeScript/NestJS developer]
 
-## DEBUG STATEMENTS TO CHECK
-Patterns: [e.g., dd() | dump() | console.log | print() | pdb.set_trace() | debugger]
+## STACK
+[Language, framework, database, frontend, auth, key packages — with versions. Only what
+changes how code is written here.]
 
-## CODING STANDARDS
-Reference: [e.g., ../../.context/rules/coding_standards.md]
-Additional Standards: [any repo-specific standards — or N/A]
+**Schema lineage:** [legacy (integer `deleted_date`, `{table}_id` keys) | framework-default (`deleted_at`, `id`) | prisma (`deletedAt`, uuid `id`)] — never mixed.
+**Test database:** [same engine as production — name it. SQLite in-memory is not acceptable.]
 
-## REPO-SPECIFIC RULES (OPTIONAL)
-Add any rules unique to this repository that do not conflict with AGENT.md.
+## COMMANDS
+<!-- Each runs as written; `bin/doctor` dry-runs them against the Verified date.
+     A changed command is changed here in the same commit. -->
 
-> These MUST NOT conflict with AGENT.md. Examples:
-> - "All API responses must use JsonResource classes"
-> - "Database migrations must include a rollback method"
-> - "All Vue components must use Composition API with `<script setup>`"
+| Purpose | Command |
+| --- | --- |
+| Exec prefix `{EXEC_RAW}` | |
+| Framework CLI `{EXEC}` | |
+| Node service `{EXEC_NODE}` | |
+| Tests for one file or filter | |
+| Full suite with coverage | |
+| Lint | |
+| Static analysis / types | |
+| Frontend build | |
+| Dev server | |
+| Database dump (before destructive migrations) | |
+
+## PORTS
+[App, database, cache, mail, Vite — from the port registry in `../../.context/reference/docker.md`, never from memory; collisions between repos are a known problem.]
+
+## MAP
+<!-- Paths only. The .docs/ rows are the framework default; change one only if this repo
+     truly differs, and say why under LOCKED DECISIONS. -->
+
+| What | Where |
+| --- | --- |
+| Application code | |
+| Modules / domains | |
+| Tests | |
+| Migrations | |
+| Frontend source | |
+| Plans | `.docs/plans/<issue>-<slug>.md` |
+| Design docs | `.docs/design/<issue>-<slug>.md` |
+| Changelog | `.docs/CHANGELOG.md` — append under `## [Unreleased]`; never read whole |
+| Learnings | `.docs/learnings/<domain>_learnings.md` |
+| Failure ledger | `.docs/TEST_LEDGER.md` |
+| Architecture | `.docs/ARCHITECTURE.md` |
+
+## TRAPS
+<!-- What has actually bitten someone: what looks right, what happens instead — connection
+     names, soft-delete columns, engine differences. In LEARNINGS twice? It belongs here. -->
+-
+
+## BLAST RADIUS
+<!-- What a change here breaks that the diff will not show: shared tables, other repos on this
+     database, scheduled jobs, integrations, deploy scripts that read committed files. -->
+-
+
+## LOCKED DECISIONS
+<!-- Settled questions a session must not reopen. Date and where the reasoning lives. -->
+
+| Decision | Date | Reasoning |
+| --- | --- | --- |
+| | | |
+
+## FEATURE CHECKLIST
+<!-- Optional. What every new feature here must include that the protocol cannot know —
+     a permission seeded, a menu entry, a shared-package export. -->
+-
+
+## DEBUG PATTERNS
+[e.g. `dd()` `dump()` `var_dump()` `console.log` `debugger` `print()`]
+
+## REPO RULES
+<!-- Additive only; true here and nowhere else. Cycle, gates and coverage belong to AGENTS.md;
+     stack-wide conventions belong in .claude/rules/, which load by path. -->
+-

@@ -14,16 +14,16 @@ You enforce database design standards, query optimization, and migration best pr
 
 ## Naming Conventions
 
-- Table names: plural snake_case (`tasks`, `project_tags`, not `Task`)
+- Table names: plural snake_case (`learner_programs`, not `LearnerProgram`)
 - Column names: snake_case (`created_at`, not `createdAt`)
-- Foreign keys: `{referenced_table_singular}_id` (e.g., `project_id`, `user_id`)
-- Pivot tables: alphabetical singular (`tag_task`, not `tasks_tags`)
+- Foreign keys: `{referenced_table_singular}_id` (e.g., `learner_id`)
+- Pivot tables: alphabetical singular (`learner_program`, not `programs_learners`)
 - Boolean columns: prefix with `is_` or `has_` (`is_active`, `has_verified`)
 
 ## Query Optimization
 
 - Never use `SELECT *` in production code — specify needed columns
-- Avoid N+1 queries: use eager loading (e.g. Eloquent `with()`) or explicit JOINs
+- Avoid N+1 queries: use eager loading (Eloquent `with()`) or JOINs (legacy DB layers)
 - Use pagination for any query that could return unbounded results
 - Use `EXPLAIN` to verify query plans for complex queries
 - Prefer database-level filtering over application-level filtering
@@ -35,15 +35,15 @@ You enforce database design standards, query optimization, and migration best pr
 - Cross-database joins: verify both connections are on the same server
 - Connection credentials must come from environment variables, never hardcoded
 
-## Migrations (Framework)
+## Migrations (Laravel)
 
-- Every migration must have a working `down()` / rollback method
+- Every migration must have a working `down()` method
 - Never modify a migration that has already been run in shared environments
-- Use descriptive names: `add_status_column_to_tasks_table`
+- Use descriptive names: `add_status_column_to_learners_table`
 - Large data migrations should be separate from schema migrations
 - Test migrations against a copy of production data when possible
 
-## Migrations (Manual SQL)
+## Migrations (Legacy / Manual SQL)
 
 - Document every schema change with date, author, and purpose
 - Provide both forward and rollback SQL

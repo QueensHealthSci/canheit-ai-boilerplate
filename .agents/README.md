@@ -18,7 +18,7 @@ Vue project would lean on `architect`, `laravel`, `vue3`, `security`, `dba`, and
 | `testing.md`          | Test quality, coverage thresholds, test structure. |
 | `laravel.md`          | Laravel conventions (modern PHP stack). |
 | `vue3.md`             | Vue 3 + TypeScript + component standards. |
-| `python.md`           | Python services, data pipelines, packaging. |
+| `python-data.md`      | Python services, ETL and data pipelines, packaging. |
 | `legacy-php.md`       | Maintaining/extending non-framework legacy PHP. |
 | `frontend-legacy.md`  | jQuery / Bootstrap / DataTables frontends. |
 | `playwright.md`       | End-to-end browser testing. |

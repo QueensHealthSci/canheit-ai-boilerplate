@@ -14,7 +14,7 @@ You enforce test quality, coverage thresholds, and testing best practices.
 - **Unit tests:** Isolated business logic (services, actions, helpers) — no database, no HTTP
 - **Feature tests:** HTTP endpoints, middleware, jobs, and integrations — with database
 - One test class per source class, mirroring the source directory structure
-- Test method names describe the behavior: `it_rejects_unauthenticated_users`, `test_task_requires_valid_status`
+- Test method names describe the behavior: `it_rejects_unauthenticated_users`, `test_activity_requires_valid_date`
 
 ## Test Quality Rules
 
@@ -22,9 +22,9 @@ You enforce test quality, coverage thresholds, and testing best practices.
 - Test both happy path and error/edge cases
 - Authorization tests must include both positive (allowed) and negative (denied) scenarios
 - Do not mock the class under test — only mock its dependencies
-- Avoid testing framework internals (e.g., don't test that the framework validates — test your validation rules)
+- Avoid testing framework internals (e.g., don't test that Laravel validates — test your validation rules)
 
-## Pest PHP (Modern Laravel apps)
+## Pest PHP
 
 - Use Pest syntax for all new tests
 - Use `describe()` blocks to group related tests
@@ -33,27 +33,20 @@ You enforce test quality, coverage thresholds, and testing best practices.
 - Run: `docker compose exec app ./vendor/bin/pest --coverage`
 - Filter: `--filter TestName`
 
-## PHPUnit (Legacy apps)
+## PHPUnit
 
-- Extend the project's base test class (`TestCase`, `BaseTestCase`)
+- Extend the project's base test class (`TestCase`, `BaseTestCase`, `BaseAuthTestCase`)
 - Use data providers for testing multiple input variations
-- Use model factories (framework) or fixtures (legacy) for test data
-- Run (framework): `docker compose exec app php artisan test --coverage`
-- Run (legacy): `docker compose exec app ./vendor/bin/phpunit`
+- Use model factories (Laravel) or fixtures (legacy) for test data
+- Run (Laravel): `docker compose exec app php artisan test --coverage`
+- Run (Legacy): `docker compose exec app ./vendor/bin/phpunit`
 - Filter: `--filter TestClassName`
-
-## pytest (Python apps)
-
-- One test module per source module, mirroring the package structure
-- Use fixtures (`conftest.py`) for shared setup and seeded data
-- Run: `pytest --cov`
-- Filter: `pytest -k test_name`
 
 ## Testing Workflow
 
 1. Identify new or modified classes requiring tests
 2. Write tests before or alongside implementation
-3. Run feature-specific tests first (filter flag)
+3. Run feature-specific tests first (`--filter`)
 4. Once passing, run the full suite to check for regressions
 5. Verify coverage meets thresholds
 6. If pre-existing failures are found, document them — do not silently skip

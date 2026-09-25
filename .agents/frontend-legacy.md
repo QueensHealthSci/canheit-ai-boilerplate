@@ -36,7 +36,7 @@ You enforce frontend standards for jQuery, Bootstrap, and DataTables-based appli
 ## Form Handling
 
 - Validate on both client-side (UX) and server-side (security)
-- Use the jQuery Validate plugin where already established
+- Use jQuery Validate plugin where already established
 - Disable submit buttons during form submission to prevent double-submits
 - Show clear error messages near the relevant fields
 

@@ -33,7 +33,7 @@ You enforce Laravel conventions and best practices for Laravel 10+ applications.
 
 ## Artisan & Jobs
 
-- Long-running tasks belong in queued jobs, not in the request lifecycle
+- Long-running tasks belong in queued jobs, not in request lifecycle
 - Artisan commands should delegate to services, not contain business logic
 - Use job batching for related async operations
 
@@ -41,10 +41,10 @@ You enforce Laravel conventions and best practices for Laravel 10+ applications.
 
 - Every migration must have a working `down()` method
 - Never modify a migration that has been run in production — create a new one
-- Use descriptive migration names: `add_status_column_to_tasks_table`
+- Use descriptive migration names: `add_status_column_to_learners_table`
 
 ## Testing
 
 - Use model factories for test data
-- Use the `RefreshDatabase` trait for feature tests
+- Use `RefreshDatabase` trait for feature tests
 - Test both positive and negative authorization scenarios

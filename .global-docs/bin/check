@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# bin/check — THE test command for a repo. `/verify` and `/onboard-repo` name it, and the
+# repo's CLAUDE.md COMMANDS section should too. If it does not exist or does not run, the
+# documentation is wrong loudly, rather than a stale command sitting in CLAUDE.md for
+# six months.
+#
+# It DETECTS the runner rather than asking you to write it down. A command a script can work
+# out is not a command a human should maintain in two places. Override either half:
+#
+#   CHECK_CMD='vendor/bin/pest --group=fast'   bin/check    # replace the whole command
+#   CHECK_PREFIX='docker compose exec -T api'  bin/check    # replace just the container prefix
+#
+# Anything after `bin/check` is passed through: bin/check --filter LoginTest
+set -uo pipefail
+cd "$(dirname "$0")/.."
+
+say() { printf '%s\n' "$*" >&2; }
+
+# --- explicit override wins -----------------------------------------------------------------
+if [ -n "${CHECK_CMD:-}" ]; then
+  say "bin/check: CHECK_CMD override"
+  exec ${CHECK_CMD} "$@"
+fi
+
+# --- container prefix ------------------------------------------------------------------------
+# Native unless the repo clearly runs its tests in a container.
+prefix=""
+if [ -n "${CHECK_PREFIX:-}" ]; then
+  prefix="$CHECK_PREFIX"
+elif [ -x vendor/bin/sail ] && [ -f docker-compose.yml ] && grep -q 'laravel\.test' docker-compose.yml 2>/dev/null; then
+  prefix="./vendor/bin/sail"
+elif [ -f docker-compose.yml ]; then
+  # The application service, not the database. Prefer the conventional names, then the first
+  # service that builds from a Dockerfile rather than a stock image.
+  for candidate in app laravel.test php web api; do
+    grep -qE "^[[:space:]]{2}${candidate}:" docker-compose.yml 2>/dev/null && { prefix="docker compose exec -T $candidate"; break; }
+  done
+fi
+
+# Fall back to native if the container is not up: a stopped container should not look like a
+# failing test suite.
+if [ -n "$prefix" ] && [ "${prefix#docker}" != "$prefix" ]; then
+  svc="${prefix##* }"
+  docker compose ps --services --filter status=running 2>/dev/null | grep -qx "$svc" || {
+    say "bin/check: compose service '$svc' is not running — falling back to native"
+    prefix=""
+  }
+fi
+
+# --- coverage driver -------------------------------------------------------------------------
+# Non-negotiable 6: coverage is measured, or reported unmeasurable. Never claimed.
+has_driver=0
+if [ -f artisan ] || [ -x vendor/bin/pest ] || [ -x vendor/bin/phpunit ]; then
+  $prefix php -m 2>/dev/null | grep -qiE '^(pcov|xdebug)$' && has_driver=1
+  [ "$has_driver" = 1 ] || note="coverage is UNMEASURABLE here — no pcov or Xdebug in the runtime. Install one or report it as unmeasurable; do not claim a number."
+fi
+
+# --- runner ------------------------------------------------------------------------------------
+# NB: bash 3.2 ships on macOS and errors on "${cov[@]}" when cov is empty under `set -u`,
+# hence the ${cov[@]+...} guard at each use.
+cov=()
+[ "$has_driver" = 1 ] && cov=(--coverage --min=80)
+
+if [ -x vendor/bin/pest ]; then
+  runner=($prefix ./vendor/bin/pest ${cov[@]+"${cov[@]}"})
+elif [ -f artisan ]; then
+  runner=($prefix php artisan test ${cov[@]+"${cov[@]}"})
+elif [ -x vendor/bin/phpunit ]; then
+  # PHPUnit has no --min; the floor is checked by eye or by the coverage report.
+  [ "$has_driver" = 1 ] && cov=(--coverage-text) || cov=()
+  runner=($prefix ./vendor/bin/phpunit ${cov[@]+"${cov[@]}"})
+elif [ -f package.json ] && grep -qE '"test"[[:space:]]*:' package.json; then
+  runner=(npm test --)
+elif [ -f pytest.ini ] || [ -f pyproject.toml ] || [ -d tests ] && command -v pytest >/dev/null 2>&1; then
+  runner=(pytest --cov --cov-fail-under=80)
+else
+  say "bin/check: no test runner found in $(pwd)."
+  say "  Looked for: vendor/bin/pest, artisan, vendor/bin/phpunit, a package.json test script, pytest."
+  say "  Set CHECK_CMD='<your full-suite command>' or add the runner. See CLAUDE.md COMMANDS."
+  exit 64
+fi
+
+[ -n "$note" ] && say "bin/check: $note"
+say "bin/check: ${runner[*]}"
+# CHECK_DRY lets bin/doctor confirm a runner resolves without paying for a test run.
+[ -n "${CHECK_DRY:-}" ] && exit 0
+exec "${runner[@]}" "$@"

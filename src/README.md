@@ -1,23 +1,26 @@
 # src/
 
-Each subdirectory here is an independent **project repository**. In a real setup these are
-typically separate git repositories (e.g. git submodules or checked-out side by side); this
-boilerplate keeps one example in-tree so the structure is easy to see.
+Each subdirectory here is an application repository. In a real setup each is its own git
+clone, ignored by the framework repo; the two examples are kept in-tree so the layout is
+easy to see.
 
-Every project in `src/` must contain its own **repo-level agent file** (`CLAUDE.md`,
-`GEMINI.md`, `.cursorrules`, etc.) that inherits from the global `../AGENT.md` and fills in
-the technology-specific details (test commands, container setup, debug patterns). Start from
-`../.global-docs/TEMPLATE_AGENT.md`.
+A repo here needs no import to get the protocol: Claude Code walks up from the repo to the
+framework root's `CLAUDE.md`, which loads `../AGENTS.md`. What does **not** walk up —
+settings, hooks, rules, skills, subagents — `../scripts/sync-repo.sh` links in as relative
+symlinks.
 
 | Project | Stack | Notes |
 |---------|-------|-------|
 | `example-site/` | Python · Flask · SQLite · pytest | A minimal task tracker demonstrating the conventions. |
 | `example-api/` | Node · TypeScript · Express · Vitest | The same task tracker in a different stack — compare the two side by side. |
 
-## Adding a new project
+## Adding a project
 
-1. Create the project directory under `src/`.
-2. Copy `../.global-docs/TEMPLATE_AGENT.md` into it and rename it for your agent.
-3. Fill in every section of the agent file.
-4. Create a `.docs/` folder with `CHANGELOG.md`, `LEARNINGS.md`, and `project-plans/`.
-5. Follow the workflow in `../.context/development_cycle.md`.
+1. Clone it here: `git clone <url> src/<repo>`. It must sit exactly at `src/<repo>/`, or the
+   relative links will not resolve.
+2. From the framework root: `scripts/sync-repo.sh <repo>`.
+3. In the repo, run `/onboard-repo`. It writes `CLAUDE.md` from
+   `../.global-docs/TEMPLATE_AGENT.md`, with every command verified, and handles the rest of
+   the adoption.
+4. From the framework root: `scripts/check-framework.sh`.
+5. Commit the result on a branch in the repo — never on `develop` or `main`.

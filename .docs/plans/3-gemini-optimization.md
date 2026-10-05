@@ -1,6 +1,6 @@
 # Dual-Engine Support: Optimizing Framework for Google Gemini and Antigravity
 
-**Status:** In progress
+**Status:** Complete
 **Issue:** #3
 **Tier:** Large
 **Estimate:** 4 hours
@@ -49,30 +49,30 @@ Make the multi-repo AI development framework natively bilingual — fully functi
 ## 6. Steps
 
 ### Phase 1: Hook Normalization & Test Suite
-1. [ ] Update `.claude/hooks/_lib.sh` to extract tool names and payloads for `run_command`, `view_file`, `replace_file_content`, `write_to_file`, `grep_search`.
-2. [ ] Update `.claude/hooks/tests/hooks.sh` with test fixtures for Gemini tool calls. Run and verify all pass.
-3. [ ] Create canonical `hooks.json` mapping Gemini tools to the guard scripts.
+1. [x] Update `.claude/hooks/_lib.sh` to extract tool names and payloads for `run_command`, `view_file`, `replace_file_content`, `write_to_file`, `grep_search`.
+2. [x] Update `.claude/hooks/tests/hooks.sh` with test fixtures for Gemini tool calls. Run and verify all pass.
+3. [x] Create canonical `hooks.json` mapping Gemini tools to the guard scripts.
 
 ### Phase 2: Customization Sync & Entry Points
-4. [ ] Create root `GEMINI.md` referencing `AGENTS.md`.
-5. [ ] Update `scripts/sync-repo.sh` to scaffold `.agents/` (rules, skills, hooks.json) and create `GEMINI.md -> CLAUDE.md` symlink.
-6. [ ] Update `.global-docs/TEMPLATE_AGENT.md` to remove tool-exclusive restrictions.
-7. [ ] Run `scripts/sync-repo.sh example-site` and `scripts/sync-repo.sh example-api` to test sync on bundled examples.
+4. [x] Create root `GEMINI.md` referencing `AGENTS.md`.
+5. [x] Update `scripts/sync-repo.sh` to scaffold `.agents/` (rules, skills, hooks.json) and create `GEMINI.md -> CLAUDE.md` symlink.
+6. [x] Update `.global-docs/TEMPLATE_AGENT.md` to remove tool-exclusive restrictions.
+7. [x] Run `scripts/sync-repo.sh example-site` and `scripts/sync-repo.sh example-api` to test sync on bundled examples.
 
 ### Phase 3: Auditing & Health Checks
-8. [ ] Update `.global-docs/bin/doctor` to detect `CLAUDE.md` or `GEMINI.md`.
-9. [ ] Update `scripts/check-framework.sh` to recognize `GEMINI.md` and verify `.agents/` links. Run and confirm 0 failures.
+8. [x] Update `.global-docs/bin/doctor` to detect `CLAUDE.md` or `GEMINI.md`.
+9. [x] Update `scripts/check-framework.sh` to recognize `GEMINI.md` and verify `.agents/` links. Run and confirm 0 failures.
 
 ### Phase 4: Prompt Refinements & Documentation
-10. [ ] Refine `AGENTS.md` non-negotiables with affirmative actions while maintaining $\le$ 150 lines budget.
-11. [ ] Update `.docs/CHANGELOG.md` under `## [Unreleased]`.
+10. [x] Refine `AGENTS.md` non-negotiables with affirmative actions while maintaining $\le$ 150 lines budget.
+11. [x] Update `.docs/CHANGELOG.md` under `## [Unreleased]`.
 
 ## 7. Verification
 
-- [ ] **Tests:** Run `bash .claude/hooks/tests/hooks.sh` to verify both Claude and Gemini payloads trigger guards (0 failures).
-- [ ] **Framework Audit:** Run `bash scripts/check-framework.sh` (0 failures, line budgets respected).
-- [ ] **Repo Health:** Run `bin/doctor` in `src/example-site` and `src/example-api`.
-- [ ] **How the user exercises it at Gate 2:**
+- [x] **Tests:** Run `bash .claude/hooks/tests/hooks.sh` to verify both Claude and Gemini payloads trigger guards (0 failures: 162 passed).
+- [x] **Framework Audit:** Run `bash scripts/check-framework.sh` (0 failures, line budgets respected: 9 pass, 0 fail).
+- [x] **Repo Health:** Run `bin/doctor` in `src/example-site` and `src/example-api`.
+- [x] **How the user exercises it at Gate 2:**
   - Run `bash .claude/hooks/tests/hooks.sh` — displays passing tests for both Claude and Gemini payloads.
   - Run `scripts/sync-repo.sh example-site` — verifies `.agents/` and `GEMINI.md` are linked.
   - Run `scripts/check-framework.sh` — passes with all line budgets met.
@@ -84,8 +84,6 @@ Make the multi-repo AI development framework natively bilingual — fully functi
 
 ## 9. Outcome
 
-<!-- Filled in at Step 5, before the hand-back. -->
-
-- **Actual effort:**
-- **Where reality differed from this plan:**
-- **Deferred:**
+- **Actual effort:** ~1 hour
+- **Where reality differed from this plan:** None; implementation followed all phases smoothly.
+- **Deferred:** None

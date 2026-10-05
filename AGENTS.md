@@ -28,12 +28,12 @@ from this file, and say so. A missing skill never excuses a skipped step.
 `[hook]` marks a rule a hook enforces or will. **If a hook blocks you, the hook is right**; do
 not route around it. The rest need judgement, which is why they are here and not in a linter.
 
-1. **Never commit or push on `develop` or `main`.** `[hook]`
+1. **Never commit or push on `develop` or `main`.** `[hook]` Branch immediately if on them.
 2. **Dump the database before any destructive migration** — `fresh`, `refresh`, `reset`,
    `rollback`, `DROP`, `TRUNCATE`. Save to `database/backups/`; restore after testing. `[hook]`
-3. **Stage by path.** Never `git add .`, `git add -A` or `git commit -a`. `[hook]`
-4. **Never read, print or edit `.env*`.** Humans edit them; you may stage and commit their
-   change, never open it. Ask for the one value you need. `[hook]`
+3. **Stage by path.** Use `git add <path>`; never `git add .`, `-A` or `git commit -a`. `[hook]`
+4. **Never read, print or edit `.env*`.** Humans edit them; stage and commit their change,
+   never open it. Inspect `config/` or ask the user for the one value you need. `[hook]`
 5. **No `push --force`, `reset --hard`, `clean -fd`, or `rm -rf` outside the repo.** `[hook]`
 6. **Coverage is 80%, and 100% for authentication, authorization, payments and PHI**, measured
    with a real driver — no driver means "unmeasurable", never a number. A floor, not evidence.

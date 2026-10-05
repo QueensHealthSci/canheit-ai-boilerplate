@@ -27,13 +27,15 @@ fi
 prefix=""
 if [ -n "${CHECK_PREFIX:-}" ]; then
   prefix="$CHECK_PREFIX"
-elif [ -x vendor/bin/sail ] && [ -f docker-compose.yml ] && grep -q 'laravel\.test' docker-compose.yml 2>/dev/null; then
+elif [ -x vendor/bin/sail ] && { [ -f docker-compose.yml ] || [ -f compose.yaml ]; } && { grep -q 'laravel\.test' docker-compose.yml 2>/dev/null || grep -q 'laravel\.test' compose.yaml 2>/dev/null; }; then
   prefix="./vendor/bin/sail"
-elif [ -f docker-compose.yml ]; then
+elif [ -f docker-compose.yml ] || [ -f compose.yaml ]; then
   # The application service, not the database. Prefer the conventional names, then the first
   # service that builds from a Dockerfile rather than a stock image.
+  _cmp="docker-compose.yml"
+  [ -f compose.yaml ] && _cmp="compose.yaml"
   for candidate in app laravel.test php web api; do
-    grep -qE "^[[:space:]]{2}${candidate}:" docker-compose.yml 2>/dev/null && { prefix="docker compose exec -T $candidate"; break; }
+    grep -qE "^[[:space:]]{2}${candidate}:" "$_cmp" 2>/dev/null && { prefix="docker compose exec -T $candidate"; break; }
   done
 fi
 

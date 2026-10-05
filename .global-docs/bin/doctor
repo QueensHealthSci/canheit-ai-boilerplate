@@ -64,8 +64,8 @@ while IFS= read -r c; do
   first="${c%% *}"
   if printf '%s' "$c" | grep -qE '^docker compose exec'; then
     svc="$(printf '%s' "$c" | sed -E 's/^docker compose exec( -[A-Za-z]+)* ([^ ]+).*/\2/')"
-    if command -v docker >/dev/null && docker compose ps --services >/dev/null 2>&1; then
-      docker compose ps --services 2>/dev/null | grep -qx "$svc" && ok "service '$svc' exists: $c" || bad "no compose service '$svc': $c"
+    if command -v docker >/dev/null && { docker compose config --services >/dev/null 2>&1 || docker compose ps --services >/dev/null 2>&1; }; then
+      { docker compose config --services 2>/dev/null || docker compose ps --services 2>/dev/null; } | grep -qx "$svc" && ok "service '$svc' exists: $c" || bad "no compose service '$svc': $c"
     else wn "docker not running — could not verify service '$svc': $c"; fi
   elif printf '%s' "$c" | grep -qE '(^|[[:space:]])(\./)?vendor/bin/[A-Za-z0-9_.-]+'; then
     bin="$(printf '%s' "$c" | grep -oE '(\./)?vendor/bin/[A-Za-z0-9_.-]+' | head -1)"

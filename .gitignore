@@ -1,6 +1,9 @@
-# Application repos are cloned into src/ and tracked in their own git history.
+# Application repos are cloned into src/ and tracked in their own git history. The two
+# bundled examples are the exception: they live in-tree so the layout is easy to see.
 /src/*
 !/src/README.md
+!/src/example-site/
+!/src/example-api/
 
 # OS / editor
 .DS_Store

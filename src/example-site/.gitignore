@@ -1,0 +1,21 @@
+# Databases
+*.db
+*.db-wal
+*.db-shm
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment
+.env
+venv/
+.venv/
+
+# Pre-migration dumps (AGENTS.md non-negotiable 2) hold real data
+database/backups/

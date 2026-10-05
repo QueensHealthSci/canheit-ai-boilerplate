@@ -1,0 +1,1 @@
+../../../../.claude/hooks/lint-on-edit.sh

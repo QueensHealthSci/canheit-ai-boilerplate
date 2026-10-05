@@ -1,1 +1,0 @@
-../../../../.claude/rules/README.md

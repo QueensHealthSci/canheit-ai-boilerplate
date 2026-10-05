@@ -1,1 +1,0 @@
-../../../../.claude/hooks/check-framework-root.sh

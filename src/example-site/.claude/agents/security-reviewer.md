@@ -1,1 +1,0 @@
-../../../../.claude/agents/security-reviewer.md

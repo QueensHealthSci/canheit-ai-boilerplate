@@ -1,1 +1,0 @@
-../../../../.claude/rules/shared.md

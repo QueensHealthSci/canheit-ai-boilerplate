@@ -19,8 +19,8 @@ pass=0; warn=0; fail=0
 ok(){ pass=$((pass+1)); printf '  PASS  %s\n' "$*"; }
 wn(){ warn=$((warn+1)); printf '  WARN  %s\n' "$*"; }
 bad(){ fail=$((fail+1)); printf '  FAIL  %s\n' "$*"; }
-# A repo is its own clone, or an in-tree example with a CLAUDE.md (the bundled examples).
-repos(){ for d in src/*/; do { [ -d "$d/.git" ] || [ -f "$d/CLAUDE.md" ]; } && basename "$d"; done; }
+# A repo is its own clone, or an in-tree example with a CLAUDE.md or GEMINI.md (the bundled examples).
+repos(){ for d in src/*/; do { [ -d "$d/.git" ] || [ -f "$d/CLAUDE.md" ] || [ -f "$d/GEMINI.md" ]; } && basename "$d"; done; }
 
 # --- --plans -------------------------------------------------------------------------------
 if [ "${1:-}" = "--plans" ]; then
@@ -44,6 +44,9 @@ budget AGENTS.md 150
 budget .claude/rules/shared.md 50
 budget .global-docs/TEMPLATE_AGENT.md 100
 n=$(wc -l < CLAUDE.md | tr -d ' '); [ "$n" -le 2 ] && ok "CLAUDE.md $n line(s)" || bad "CLAUDE.md should be one @AGENTS.md line, has $n"
+if [ -e GEMINI.md ]; then
+  [ -L GEMINI.md ] && ok "GEMINI.md linked to $(readlink GEMINI.md)" || ok "GEMINI.md present"
+fi
 
 echo "== always-on rules =="
 for f in .claude/rules/*.md; do
@@ -58,7 +61,7 @@ while IFS= read -r hit; do
   f="${hit%%:*}"; p="${hit#*:*:}"
   case "$p" in *'<'*|*'>'*) continue ;; esac   # <placeholder> segments are illustrative
   [ -e "$p" ] || { bad "$f references missing $p"; dead=1; }
-done < <(grep -rnoE '\.(context|global-docs|claude)/[A-Za-z0-9_./-]+\.(md|sh|json|neon)' \
+done < <(grep -rnoE '\.(context|global-docs|claude|agents)/[A-Za-z0-9_./-]+\.(md|sh|json|neon)' \
            AGENTS.md .context/development_cycle.md .context/enforcement.md .global-docs/*.md .claude/rules/*.md 2>/dev/null \
          | grep -v reference/coding-standards-examples | sort -u)
 [ "$dead" = 0 ] && ok "no dead paths in the always-on and reference set"
@@ -93,6 +96,15 @@ for r in $(repos); do
       [ -e "$root/.claude/$area/$b" ] || { own=$((own+1)); printf '        repo-only:  .claude/%s/%s\n' "$area" "$b"; }
     done
   done
+  for area in rules skills; do
+    [ -d "$d/.agents/$area" ] || continue
+    for t in "$d/.agents/$area"/*; do
+      [ -L "$t" ] && [ ! -e "$t" ] && { broken=$((broken+1)); printf '        broken:     .agents/%s/%s -> %s\n' "$area" "$(basename "$t")" "$(readlink "$t")"; }
+    done
+  done
+  if [ -L "$d/GEMINI.md" ] && [ ! -e "$d/GEMINI.md" ]; then
+    broken=$((broken+1)); printf '        broken:     GEMINI.md -> %s\n' "$(readlink "$d/GEMINI.md")"
+  fi
   extra=""; [ "$own" -gt 0 ] && extra=" (+$own repo-only)"
   if   [ "$broken" -gt 0 ];  then bad "$r: $broken BROKEN link(s) - the hooks do not run. Is this repo under <workspace>/src/? Re-run sync-repo.sh $r$extra"
   elif [ "$over" -gt 0 ];    then bad "$r: $over file(s) override canonical - justify in LOCKED DECISIONS or re-link$extra"

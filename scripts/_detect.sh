@@ -12,7 +12,7 @@
 # trigger its own rules — a Laravel repo's only .py file can be the hooks' own _strip.py,
 # which would install python.md there.
 repo_files() {
-  git -C "$1" ls-files --cached --others --exclude-standard 2>/dev/null | grep -v '^\.claude/'
+  git -C "$1" ls-files --cached --others --exclude-standard 2>/dev/null | grep -vE '^\.(claude|agents)/'
 }
 
 # glob_to_regex <glob> -> an ERE body (no anchors).

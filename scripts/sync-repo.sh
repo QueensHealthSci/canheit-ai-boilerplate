@@ -89,7 +89,7 @@ say "branch" "$branch"
 # writes never block the next run. Restating the list by hand is what broke it before: the
 # old enumeration missed `.gitignore` (the e2e scaffold appends to it) and the collapsed
 # `?? .docs/`, so every UI repo refused its second sync.
-owned=( '\.claude/' 'bin/' 'e2e/' 'playwright\.config\.' '\.docs/' '\.gitignore$' )
+owned=( '\.claude/' '\.agents/' 'bin/' 'e2e/' 'playwright\.config\.' '\.docs/' '\.gitignore$' 'GEMINI\.md$' )
 while IFS= read -r l; do
   [ -n "$l" ] || continue
   owned+=( "$(printf '%s' "$l" | sed 's/[.]/\\./g')\$" )
@@ -111,25 +111,35 @@ fi
 [ -n "$dirty" ] && say "WARN" "proceeding over $(printf '%s\n' "$dirty" | wc -l | tr -d ' ') uncommitted change(s) (--force)"
 
 # --- hooks, subagents ---------------------------------------------------------------------
-run mkdir -p "$dest/.claude"
+run mkdir -p "$dest/.claude" "$dest/.agents"
 for d in hooks agents skills; do
   install_entries "$root/.claude/$d" "$dest/.claude/$d" ".claude/$d/"
 done
 [ "$mode" = copy ] && run chmod +x "$dest/.claude/hooks/"*.sh 2>/dev/null
-:
+
+# Dual-link skills & hooks for Gemini / Antigravity under .agents/
+install_entries "$root/.claude/skills" "$dest/.agents/skills" ".agents/skills/"
+if [ -f "$root/.claude/hooks.json" ]; then
+  install "$root/.claude/hooks.json" "$dest/.agents/hooks.json" ".agents/hooks.json"
+fi
 
 # --- rules: each rule decides for itself whether it applies here --------------------------
 # No list of rule names lives in this script. A rule declares `applies:` (or falls back to
 # `paths:`) in its own frontmatter, and adding .claude/rules/go.md needs no edit here.
-run mkdir -p "$dest/.claude/rules"
+run mkdir -p "$dest/.claude/rules" "$dest/.agents/rules"
 for rule in "$root/.claude/rules"/*.md; do
   [ -f "$rule" ] || continue
   b="$(basename "$rule")"
   if rule_applies "$dest" "$rule"; then
     install "$rule" "$dest/.claude/rules/$b" ".claude/rules/$b"
-  elif [ -L "$dest/.claude/rules/$b" ]; then
-    # It applied once and no longer does - remove the link, never a real or repo-only file.
-    run rm -f "$dest/.claude/rules/$b"; say "unlink" ".claude/rules/$b (no longer applies)"
+    install "$rule" "$dest/.agents/rules/$b" ".agents/rules/$b"
+  else
+    if [ -L "$dest/.claude/rules/$b" ]; then
+      run rm -f "$dest/.claude/rules/$b"; say "unlink" ".claude/rules/$b (no longer applies)"
+    fi
+    if [ -L "$dest/.agents/rules/$b" ]; then
+      run rm -f "$dest/.agents/rules/$b"; say "unlink" ".agents/rules/$b (no longer applies)"
+    fi
   fi
 done
 
@@ -140,6 +150,11 @@ run mkdir -p "$dest/bin"
 # overrides go through CHECK_CMD / CHECK_PREFIX in the environment.
 install "$root/.global-docs/bin/doctor" "$dest/bin/doctor" "bin/doctor"
 install "$root/.global-docs/bin/check"  "$dest/bin/check"  "bin/check"
+
+# --- GEMINI.md entry point: relative link to CLAUDE.md -----------------------------------
+if [ -f "$dest/CLAUDE.md" ]; then
+  install "$dest/CLAUDE.md" "$dest/GEMINI.md" "GEMINI.md"
+fi
 
 # --- linter configs -------------------------------------------------------------------------
 # Installed only when ABSENT. A repo's own pint.json or phpstan.neon is configuration someone
@@ -169,7 +184,10 @@ if [ "$has_ui" = 1 ] && [ "$has_pw" = 0 ]; then
   run cp "$root/.global-docs/e2e/playwright.config.ts" "$dest/playwright.config.ts"
   run cp "$root/.global-docs/e2e/global.setup.ts"      "$dest/e2e/global.setup.ts"
   run cp "$root/.global-docs/e2e/smoke.spec.ts"        "$dest/e2e/smoke.spec.ts"
-  [ -f "$root/.claude/rules/e2e.md" ] && install "$root/.claude/rules/e2e.md" "$dest/.claude/rules/e2e.md" ".claude/rules/e2e.md"   # scaffolded just now, so it applies from here on
+  if [ -f "$root/.claude/rules/e2e.md" ]; then
+    install "$root/.claude/rules/e2e.md" "$dest/.claude/rules/e2e.md" ".claude/rules/e2e.md"
+    install "$root/.claude/rules/e2e.md" "$dest/.agents/rules/e2e.md" ".agents/rules/e2e.md"
+  fi
   say "scaffold" "playwright.config.ts + e2e/ (run: npm i -D @playwright/test)"
   if [ "$dry" = 0 ] && [ -f "$dest/.gitignore" ] && ! grep -q '^e2e/\.auth' "$dest/.gitignore"; then
     printf '\n# Playwright stored session - a credential\ne2e/.auth/\n' >> "$dest/.gitignore"

@@ -13,9 +13,12 @@ g init -q && g checkout -q -b develop && g commit -q --allow-empty -m init
 
 bash_json() { jq -nc --arg c "$1" '{tool_name:"Bash",tool_input:{command:$c}}'; }
 file_json() { jq -nc --arg t "$1" --arg f "$2" '{tool_name:$t,tool_input:{file_path:$f}}'; }
+gemini_cmd_json() { jq -nc --arg c "$1" '{tool_name:"run_command",tool_input:{CommandLine:$c}}'; }
+gemini_file_json() { jq -nc --arg t "$1" --arg f "$2" '{tool_name:$t,tool_input:{TargetFile:$f}}'; }
+gemini_view_json() { jq -nc --arg f "$1" '{tool_name:"view_file",tool_input:{AbsolutePath:$f}}'; }
 t() {  # t <expect> <hook> <json> <label>
   local want="$1" hook="$2" json="$3" label="$4" got
-  printf '%s' "$json" | CLAUDE_PROJECT_DIR="$T" "$H/$hook" >"$T/.out" 2>"$T/.err"; got=$?
+  printf '%s' "$json" | CLAUDE_PROJECT_DIR="$T" GEMINI_PROJECT_DIR="$T" "$H/$hook" >"$T/.out" 2>"$T/.err"; got=$?
   if [ "$got" = "$want" ]; then pass=$((pass+1)); printf '  ok    %-20s %s\n' "$hook" "$label"
   else fail=$((fail+1)); printf '  FAIL  %-20s %s  (want %s got %s) %s\n' "$hook" "$label" "$want" "$got" "$(head -c 140 "$T/.err")"; fi
 }
@@ -246,5 +249,17 @@ out="$(file_json Edit "$T/resources/js/App.vue" | CLAUDE_PROJECT_DIR="$T" "$H/li
 printf '%s' "$out" | grep -q 'Frontend source changed' && printf '%s' "$out" | jq -e .hookSpecificOutput.additionalContext >/dev/null && { pass=$((pass+1)); echo "  ok    frontend reminder as JSON additionalContext"; } || { fail=$((fail+1)); echo "  FAIL  frontend reminder: $out"; }
 out="$(file_json Edit "$T/app/Foo.php" | CLAUDE_PROJECT_DIR="$T" "$H/lint-on-edit.sh")"
 [ -z "$out" ] && { pass=$((pass+1)); echo "  ok    silent for backend file with no linter installed"; } || { fail=$((fail+1)); echo "  FAIL  unexpected output: $out"; }
+
+echo "gemini tool normalization"
+t 2 $B "$(gemini_cmd_json 'git push --force origin feature/1-x')" "run_command push --force blocked"
+t 2 $B "$(gemini_cmd_json 'git add .')"                          "run_command git add . blocked"
+t 0 $B "$(gemini_cmd_json 'git status')"                         "run_command git status allowed"
+t 0 $B "$(gemini_cmd_json 'git commit -m "feat(gemini): ok"')"  "run_command valid commit allowed"
+t 2 $C "$(gemini_cmd_json 'git commit -m "bad commit"')"         "run_command non-conventional commit blocked"
+t 2 $S "$(gemini_view_json "$T/.env")"                           "view_file on .env blocked"
+t 2 $S "$(gemini_file_json write_to_file "$T/.env.prod")"        "write_to_file on .env.prod blocked"
+t 2 $S "$(gemini_file_json replace_file_content "$T/.env.local")" "replace_file_content on .env.local blocked"
+t 0 $S "$(gemini_view_json "$T/app/Foo.php")"                    "view_file on code allowed"
+t 2 $M "$(gemini_cmd_json 'php artisan migrate:fresh')"          "run_command migrate:fresh blocked without backup"
 
 echo; printf '%d passed, %d failed\n' "$pass" "$fail"; [ "$fail" -eq 0 ]

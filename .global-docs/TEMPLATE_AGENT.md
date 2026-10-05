@@ -1,7 +1,7 @@
 # {REPO NAME}
 
 <!--
-Copy to the repo root as CLAUDE.md. Claude Code only — no GEMINI.md, AGENTS.md, .cursorrules.
+Copy to the repo root as CLAUDE.md (sync-repo.sh links GEMINI.md -> CLAUDE.md for Gemini).
 
 CONFIGURATION, not policy. AGENTS.md owns the cycle, gates, coverage, branch and plan locations
 and the definition of done; restate none of it. Where they disagree, AGENTS.md wins and this

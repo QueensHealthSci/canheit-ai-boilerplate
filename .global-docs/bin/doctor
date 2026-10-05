@@ -16,6 +16,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 repo="$PWD"; file="CLAUDE.md"
+[ -f "$file" ] || file="GEMINI.md"
 pass=0; warn=0; fail=0
 ok()   { pass=$((pass+1)); printf '  PASS  %s\n' "$*"; }
 wn()   { warn=$((warn+1)); printf '  WARN  %s\n' "$*"; }
@@ -29,7 +30,7 @@ table_col() {  # table_col N -> Nth cell of each data row on stdin, backticks st
   grep -E '^\|' | grep -vE '^\|[[:space:]]*-+' | awk -F'|' -v n="$1" 'NR>1{print $(n+1)}' | strip
 }
 
-[ -f "$file" ] || { echo "FAIL  no $file in $repo"; exit 1; }
+[ -f "$file" ] || { echo "FAIL  neither CLAUDE.md nor GEMINI.md found in $repo"; exit 1; }
 echo "doctor: $repo"
 
 # --- header ------------------------------------------------------------------------------
@@ -45,8 +46,13 @@ grep -qE '^@\.\./\.\./AGENT\.md|Global Protocol:.*AGENT\.md' "$file" && bad "imp
 # --- protocol loads --------------------------------------------------------------------
 echo "protocol"
 d="$repo"; found=''
-for _ in 0 1 2 3; do [ -f "$d/CLAUDE.md" ] && grep -q '^@AGENTS\.md' "$d/CLAUDE.md" && [ -f "$d/AGENTS.md" ] && { found="$d"; break; }; [ "$d" = / ] && break; d="$(dirname "$d")"; done
-[ -n "$found" ] && ok "AGENTS.md reachable via $found/CLAUDE.md" || bad "no ancestor CLAUDE.md imports AGENTS.md — the protocol will not load here (clone under codebase/src/)"
+for _ in 0 1 2 3; do
+  if [ -f "$d/AGENTS.md" ] && { { [ -f "$d/CLAUDE.md" ] && grep -q '^@AGENTS\.md' "$d/CLAUDE.md"; } || [ -f "$d/GEMINI.md" ]; }; then
+    found="$d"; break
+  fi
+  [ "$d" = / ] && break; d="$(dirname "$d")"
+done
+[ -n "$found" ] && ok "AGENTS.md reachable via $found" || bad "no ancestor CLAUDE.md or GEMINI.md imports AGENTS.md — the protocol will not load here (clone under <framework-root>/src/)"
 
 # --- commands ----------------------------------------------------------------------------
 echo "commands"

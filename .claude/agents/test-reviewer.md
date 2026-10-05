@@ -1,7 +1,7 @@
 ---
 name: test-reviewer
 description: Reviews whether tests actually verify the change - coverage of the diff, meaningful assertions, authorization both ways, and tests weakened to pass. Called by /verify before Gate 2. Read-only.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, view_file, grep_search, list_dir, run_command
 model: inherit
 ---
 

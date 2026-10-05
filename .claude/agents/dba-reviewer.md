@@ -1,7 +1,7 @@
 ---
 name: dba-reviewer
 description: Reviews schema changes, migrations and queries for lineage violations, missing indexes, N+1 patterns and irreversible migrations. Called by /verify when a change touches database/, migrations or query code. Read-only.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, view_file, grep_search, list_dir, run_command
 model: inherit
 ---
 

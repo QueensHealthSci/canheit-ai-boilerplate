@@ -12,7 +12,12 @@ hook_payload=""
 # One pass for every field, rather than one spawn per field. NUL-separated, not newline:
 # a Bash command is routinely multi-line, and line-based reads would split it across fields.
 _parse_payload() {
-  local q='[.tool_name, .tool_input.command, .tool_input.file_path, .tool_input.path] | map(. // "") | join("\u0000") + "\u0000"'
+  local q='[
+    .tool_name,
+    (.tool_input.command // .tool_input.CommandLine // ""),
+    (.tool_input.file_path // .tool_input.path // .tool_input.AbsolutePath // .tool_input.TargetFile // .tool_input.SearchPath // .tool_input.DirectoryPath // ""),
+    (.tool_input.path // .tool_input.SearchPath // .tool_input.DirectoryPath // "")
+  ] | map(. // "") | join("\u0000") + "\u0000"'
   if command -v jq >/dev/null 2>&1; then
     printf '%s' "$hook_payload" | jq -j "$q" 2>/dev/null
   else
@@ -21,7 +26,11 @@ import json, sys
 try:
     o = json.load(sys.stdin); i = o.get("tool_input", {})
     if not isinstance(i, dict): i = {}
-    vals = [o.get("tool_name"), i.get("command"), i.get("file_path"), i.get("path")]
+    t_name = o.get("tool_name")
+    cmd = i.get("command") or i.get("CommandLine")
+    f_path = i.get("file_path") or i.get("AbsolutePath") or i.get("TargetFile") or i.get("path") or i.get("SearchPath") or i.get("DirectoryPath")
+    p_path = i.get("path") or i.get("SearchPath") or i.get("DirectoryPath")
+    vals = [t_name, cmd, f_path, p_path]
 except Exception:
     vals = [None] * 4
 sys.stdout.write("".join((v if isinstance(v, str) else "") + "\0" for v in vals))' 2>/dev/null
@@ -33,7 +42,7 @@ if [ -n "$hook_payload" ]; then
     IFS= read -r -d '' tool_file; IFS= read -r -d '' tool_path; } < <(_parse_payload) || true
 fi
 : "${tool_name:=}" "${tool_command:=}" "${tool_file:=}" "${tool_path:=}"
-repo_dir="${CLAUDE_PROJECT_DIR:-$PWD}"
+repo_dir="${CLAUDE_PROJECT_DIR:-${GEMINI_PROJECT_DIR:-$PWD}}"
 
 # --- shared constants ----------------------------------------------------------------------
 # One definition each, because a bypass found in one guard has to close in all of them.
@@ -79,8 +88,7 @@ PROTOCOL_FILE="AGENTS.md"
 find_framework_root() {
   local d="${1:-$PWD}" i
   for i in 0 1 2 3 4; do
-    if [ -f "$d/CLAUDE.md" ] && grep -q "^@${PROTOCOL_FILE}\$" "$d/CLAUDE.md" 2>/dev/null \
-       && [ -f "$d/$PROTOCOL_FILE" ]; then printf '%s' "$d"; return 0; fi
+    if [ -f "$d/$PROTOCOL_FILE" ] && { { [ -f "$d/CLAUDE.md" ] && grep -q "^@${PROTOCOL_FILE}\$" "$d/CLAUDE.md" 2>/dev/null; } || [ -f "$d/GEMINI.md" ]; }; then printf '%s' "$d"; return 0; fi
     [ "$d" = "/" ] && break
     d="$(dirname "$d")"
   done

@@ -1,0 +1,57 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${GEMINI_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"/.claude/hooks/check-framework-root.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "run_command|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${GEMINI_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"/.claude/hooks/guard-git.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"${GEMINI_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"/.claude/hooks/guard-migrations.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"${GEMINI_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"/.claude/hooks/guard-secrets.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"${GEMINI_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"/.claude/hooks/guard-commit.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "view_file|replace_file_content|write_to_file|multi_replace_file_content|grep_search|Read|Edit|Write|MultiEdit|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${GEMINI_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"/.claude/hooks/guard-secrets.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "replace_file_content|write_to_file|multi_replace_file_content|Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${GEMINI_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-$PWD}}\"/.claude/hooks/lint-on-edit.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 ---
 name: security-reviewer
 description: Reviews a diff for authentication, authorization, data isolation and input handling defects. Called by /verify before Gate 2 when a change touches auth, ACL, uploads, payments or PHI. Read-only.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, view_file, grep_search, list_dir, run_command
 model: inherit
 ---
 
